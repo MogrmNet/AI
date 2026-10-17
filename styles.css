@@ -410,3 +410,69 @@ html[dir="rtl"] #toast.show { transform: translate(50%, 0); }
   }
 }
 
+
+/* GARHI - Mobile layout correction */
+@media screen and (max-width: 768px) {
+  html,
+  body {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    overflow-x: clip;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  .container,
+  .wrapper,
+  .page-container {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-inline: auto;
+  }
+
+  .hero-grid,
+  .g2,
+  .g3,
+  .g4,
+  .flow,
+  .template-columns,
+  .related-columns {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .hero-grid > *,
+  .card,
+  .section,
+  table {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  img,
+  svg,
+  canvas {
+    max-width: 100%;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.8rem, 7vw, 2.5rem);
+    overflow-wrap: anywhere;
+  }
+
+  .section {
+    padding-inline: 0.75rem;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+
