@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WaveSense AI — Wi-Fi CSI Motion Detection | دراسة جدوى تفاعلية</title>
+<meta name="description" content="WaveSense AI: interactive feasibility study and implementation blueprint for Wi-Fi CSI-based motion detection with ESP32. دراسة جدوى تفاعلية لمشروع كشف الحركة باستخدام Wi-Fi CSI. Designed & Developed by GARHI.">
+<meta name="author" content="GARHI">
+<meta name="theme-color" content="#07111F">
+<meta property="og:title" content="WaveSense AI — Sense the Invisible.">
+<meta property="og:description" content="Interactive feasibility study and prototype blueprint for Wi-Fi CSI-based motion detection. Demo data is simulated.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>
+  /* Apply saved language/theme before first paint (defensive: storage may be unavailable). */
+  try {
+    var l = JSON.parse(localStorage.getItem('wsai.lang')), t = JSON.parse(localStorage.getItem('wsai.theme'));
+    var h = document.documentElement;
+    if (l === 'en') { h.lang = 'en'; h.dir = 'ltr'; }
+    if (t === 'light') { h.setAttribute('data-theme', 'light'); }
+  } catch (e) {}
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script defer src="https://unpkg.com/lucide@latest"></script>
+<script defer src="script.js"></script>
+</head>
+<body>
+<a class="skip" href="#main"><span class="ar">تخطَّ إلى المحتوى</span><span class="en">Skip to content</span></a>
+
+<header class="site">
+  <div class="container">
+    <div class="bar">
+      <a class="brand" href="#home" aria-label="WaveSense AI">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22D3EE"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#07111F" stroke="rgba(148,163,184,.3)"/><path d="M10 34 Q17 14 24 34 T38 34 T52 34" fill="none" stroke="url(#lg)" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="48" r="3.5" fill="#14B8A6"/></svg>
+        <span>WaveSense AI</span>
+      </a>
+      <span class="garhi-mark" title="GARHI">GARHI</span>
+      <span class="spacer"></span>
+      <button class="btn icon" id="theme-btn" type="button" data-aria-ar="تبديل المظهر (داكن/فاتح)" data-aria-en="Toggle theme (dark/light)" aria-label="Toggle theme"><i data-lucide="sun-moon"></i><span class="sr-only">Theme</span></button>
+      <button class="btn" id="lang-btn" type="button" aria-label="Switch language"><i data-lucide="languages"></i><span class="ar">English</span><span class="en">العربية</span></button>
+      <button class="btn icon" id="menu-btn" type="button" aria-expanded="false" aria-controls="main-nav" data-aria-ar="القائمة" data-aria-en="Menu" aria-label="Menu"><i data-lucide="menu"></i></button>
+    </div>
+  </div>
+  <div class="nav-wrap">
+    <div class="container">
+      <nav class="main" id="main-nav" data-aria-ar="التنقل الرئيسي" data-aria-en="Main navigation" aria-label="Main navigation"><ul id="nav-list"></ul></nav>
+    </div>
+  </div>
+</header>
+
+<div class="print-brand" aria-hidden="true">WaveSense AI · GARHI</div>
+
+<main id="main">
+
+<!-- ================= A. HERO ================= -->
+<section class="hero section" id="home" style="padding-top:3rem">
+  <div class="container hero-grid">
+    <div>
+      <span class="chip cyan"><span class="dot on"></span><span class="ar">مخطط نموذج أولي</span><span class="en">Prototype Blueprint</span></span>
+      <h1 style="margin-top:.8rem">WaveSense AI</h1>
+      <div class="sub">Wi-Fi CSI-Based Motion Detection</div>
+      <div class="tag"><span class="ar">استشعر ما لا تراه.</span><span class="en">Sense the Invisible.</span></div>
+      <p class="lead ar">مشروع لكشف الحركة داخل غرفة تجريبية خاضعة للتحكم باستخدام لوحات ESP32 متوافقة، وقياسات حالة قناة Wi-Fi (CSI)، ومعالجة إشارات بلغة Python وخوارزمية ذكاء اصطناعي، دون الاعتماد على صور الكاميرا. هذا الموقع هو دراسة الجدوى ومخطط التنفيذ.</p>
+      <p class="lead en">A project to distinguish motion from relative stillness in a controlled test room using compatible ESP32 boards, Wi-Fi Channel State Information (CSI), Python signal processing, and an AI-based detection algorithm — without camera images. This website is the feasibility study and implementation blueprint.</p>
+      <div class="cta">
+        <a class="btn primary" href="#summary"><i data-lucide="compass"></i><span class="ar">استكشف المشروع</span><span class="en">Explore the Project</span></a>
+        <a class="btn" href="#demo"><i data-lucide="activity"></i><span class="ar">افتح العرض التجريبي</span><span class="en">Open Live Demo</span></a>
+      </div>
+      <div class="note warn" role="note">
+        <b class="ar">تنبيه:</b><b class="en">Notice:</b>
+        <span class="ar">لوحة التحكم في هذا الموقع تستخدم <b>بيانات محاكاة</b> إلى أن يتم توصيل عتاد حقيقي. لا يوجد نظام استشعار فعلي يعمل هنا، ولا تُقدَّم أي نتائج دقة مقاسة.</span>
+        <span class="en">The dashboard on this site uses <b>simulated data</b> until real hardware is connected. No live sensing system runs here, and no measured accuracy results are presented.</span>
+      </div>
+    </div>
+    <div class="hero-art wm" role="img" aria-label="Illustration: a room with two wireless sensing nodes, Wi-Fi waves, a moving person and a motion signal.">
+      <svg viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="20" y="24" width="520" height="312" rx="18" fill="none" stroke="var(--border)" stroke-width="2"/>
+        <g stroke="var(--grid-line)" stroke-width="1">
+          <path d="M20 250 H540 M20 285 H540 M120 250 L80 336 M220 250 L200 336 M320 250 L320 336 M420 250 L440 336"/>
+        </g>
+        <!-- TX node -->
+        <g>
+          <rect x="44" y="150" width="62" height="46" rx="8" fill="var(--card-solid)" stroke="var(--cyan)" stroke-width="2"/>
+          <path d="M60 150 V128 M90 150 V134" stroke="var(--cyan)" stroke-width="3" stroke-linecap="round"/>
+          <text x="75" y="179" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="14" fill="var(--text)">TX</text>
+          <text x="75" y="216" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="var(--muted)">ESP32</text>
+        </g>
+        <!-- RX node -->
+        <g>
+          <rect x="454" y="150" width="62" height="46" rx="8" fill="var(--card-solid)" stroke="var(--purple)" stroke-width="2"/>
+          <path d="M470 150 V128 M500 150 V134" stroke="var(--purple)" stroke-width="3" stroke-linecap="round"/>
+          <text x="485" y="179" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="14" fill="var(--text)">RX</text>
+          <text x="485" y="216" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="var(--muted)">ESP32 · CSI</text>
+        </g>
+        <!-- Waves -->
+        <path class="wave" d="M118 160 A36 36 0 0 1 118 186"/>
+        <path class="wave w2" d="M132 142 A62 62 0 0 1 132 204"/>
+        <path class="wave w3" d="M146 124 A88 88 0 0 1 146 222"/>
+        <!-- Person -->
+        <g class="person">
+          <g transform="translate(180 0)">
+            <circle cx="100" cy="132" r="13" fill="var(--text)" opacity=".85"/>
+            <path d="M100 146 V196 M100 160 L80 182 M100 160 L120 182 M100 196 L84 238 M100 196 L116 238" stroke="var(--text)" stroke-width="6" stroke-linecap="round" fill="none" opacity=".85"/>
+          </g>
+        </g>
+        <!-- Signal strip -->
+        <rect x="44" y="262" width="472" height="62" rx="10" fill="rgba(7,17,31,.55)" stroke="var(--border)"/>
+        <path class="sigline" d="M54 294 H150 l8 -16 8 32 8 -28 8 24 8 -20 8 16 8 -8 8 6 H300 l10 -18 10 34 10 -30 10 26 10 -22 10 18 10 -12 10 8 H504" fill="none" stroke="var(--cyan)" stroke-width="2.2" stroke-linejoin="round"/>
+        <text x="54" y="276" font-family="Inter,sans-serif" font-size="10" fill="var(--muted)">CSI signal — illustrative only</text>
+        <circle class="flow-dot" cx="500" cy="274" r="4" fill="var(--warn)"/>
+        <text x="538" y="48" text-anchor="end" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="var(--warn)">ILLUSTRATION</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ================= B. EXECUTIVE SUMMARY ================= -->
+<section class="section" id="summary">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">01 · Executive Summary</span>
+      <h2><span class="ar">الملخص التنفيذي</span><span class="en">Executive Summary</span></h2>
+      <p class="lead ar">نظرة موجزة على المشكلة والحل والتقنية ونطاق النموذج الأولي وحدوده.</p>
+      <p class="lead en">A concise view of the problem, solution, technology, prototype scope and limits.</p>
+    </div>
+    <div class="grid g3">
+      <article class="card wm"><h3><i data-lucide="alert-circle"></i><span class="ar">المشكلة</span><span class="en">The problem</span></h3>
+        <p class="ar">كشف وجود الحركة في الغرف عادةً يعتمد على كاميرات (حساسية خصوصية) أو حساسات مخصصة (تغطية محدودة بخط الرؤية). نبحث في بديل يعتمد على قياسات قناة لاسلكية موجودة أصلًا في البيئة.</p>
+        <p class="en">Detecting motion in rooms usually relies on cameras (privacy-sensitive) or dedicated sensors (coverage limited to line of sight). We explore an alternative based on wireless channel measurements.</p></article>
+      <article class="card wm"><h3><i data-lucide="lightbulb"></i><span class="ar">الحل المقترح</span><span class="en">Proposed solution</span></h3>
+        <p class="ar">لوحتا ESP32 متوافقتان: مُرسِل ومُستقبِل. المستقبِل يستخرج قياسات CSI، وبايثون يعالجها، وخوارزمية تقدّر وجود حركة، ثم تُسجَّل النتيجة وتُعرض في لوحة تحكم.</p>
+        <p class="en">Two compatible ESP32 boards: a transmitter and a receiver. The receiver extracts CSI, Python processes it, an algorithm estimates motion, and the result is stored and shown on a dashboard.</p></article>
+      <article class="card wm"><h3><i data-lucide="cpu"></i><span class="ar">التقنية</span><span class="en">Technology</span></h3>
+        <p class="ar">ESP32 + ESP-IDF + ESP-CSI، بايثون (NumPy/pandas/SciPy/scikit-learn)، Flask أو FastAPI، SQLite، وواجهة HTML/CSS/JS مع Chart.js.</p>
+        <p class="en">ESP32 + ESP-IDF + ESP-CSI, Python (NumPy/pandas/SciPy/scikit-learn), Flask or FastAPI, SQLite, and an HTML/CSS/JS dashboard with Chart.js.</p></article>
+      <article class="card wm"><h3><i data-lucide="users"></i><span class="ar">المستخدمون المستهدفون</span><span class="en">Target users</span></h3>
+        <p class="ar">مشرفو المشروع الجامعي، لجان التحكيم، فريق التطوير، الشركاء والرعاة المحتملون، ومستخدمون مستقبليون مهتمون بالتقنية.</p>
+        <p class="en">University supervisors, hackathon judges, the development team, potential collaborators and sponsors, and future users interested in the technology.</p></article>
+      <article class="card wm"><h3><i data-lucide="package-check"></i><span class="ar">المخرجات المتوقعة</span><span class="en">Expected deliverables</span></h3>
+        <ul class="ar"><li>برنامج ثابت (Firmware) وبيانات عيّنة</li><li>سكربت جمع بيانات وكود معالجة</li><li>واجهة برمجية وقاعدة بيانات</li><li>لوحة تحكم وتصميم Figma</li><li>تقرير تقييم وعرض تقديمي</li></ul>
+        <ul class="en"><li>Firmware and sample recordings</li><li>Acquisition script and processing code</li><li>Backend API and database</li><li>Dashboard and Figma design</li><li>Evaluation report and presentation</li></ul></article>
+      <article class="card wm"><h3><i data-lucide="target"></i><span class="ar">نطاق النموذج الأولي</span><span class="en">Current prototype scope</span></h3>
+        <p class="ar">التمييز بين «حركة» و«سكون نسبي» في بيئة اختبار مضبوطة. لا يشمل تحديد الأشخاص أو عدّهم أو تحديد مواقعهم.</p>
+        <p class="en">Distinguishing “motion” from “relative stillness” in a controlled test environment. It does not identify, count or locate people.</p></article>
+    </div>
+    <div class="note warn" style="margin-top:1rem">
+      <b class="ar">القيود التقنية الرئيسية:</b><b class="en">Key technical limitations:</b>
+      <span class="ar">الأداء يتغير حسب الغرفة والأثاث والتداخل اللاسلكي؛ توافق اللوحة والبرنامج الثابت إلزامي؛ المحاكاة لا تثبت دقة واقعية؛ ولا توجد نتائج مقاسة في هذا الموقع.</span>
+      <span class="en">Performance varies with room layout, furniture and wireless interference; board/firmware compatibility is mandatory; simulation cannot establish real-world accuracy; and no measured results appear on this site.</span>
+    </div>
+    <div class="card wm" style="margin-top:1rem">
+      <h3><i data-lucide="workflow"></i><span class="ar">نظرة عامة على المعمارية</span><span class="en">Architecture overview</span></h3>
+      <p class="mono small" dir="ltr" style="color:var(--cyan)">ESP32 TX → ESP32 RX (CSI) → Python Acquisition → AI Signal Processing → Backend API → SQLite → Dashboard</p>
+      <button class="btn sm" type="button" data-action="copy-summary"><i data-lucide="copy"></i><span class="ar">نسخ ملخص المشروع</span><span class="en">Copy project summary</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= C. PROBLEM & SOLUTION ================= -->
+<section class="section" id="problem">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">02 · Problem &amp; Solution</span>
+      <h2><span class="ar">المشكلة والحل المقترح</span><span class="en">Problem and Proposed Solution</span></h2>
+      <p class="lead ar">مقارنة عادلة بين ثلاث مقاربات. لا نزعم أن CSI أدق أو أكثر خصوصية في كل الحالات.</p>
+      <p class="lead en">A balanced comparison of three approaches. We do not claim CSI is always more accurate or more private.</p>
+    </div>
+    <div class="tbl-wrap wm">
+      <table class="tbl">
+        <thead><tr>
+          <th><span class="ar">المعيار</span><span class="en">Criterion</span></th>
+          <th><span class="ar">كاميرا</span><span class="en">Camera-based</span></th>
+          <th><span class="ar">حساس حركة مخصص (مثل PIR)</span><span class="en">Dedicated sensor (e.g., PIR)</span></th>
+          <th>Wi-Fi CSI</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><b class="ar">ما الذي يُقاس</b><b class="en">What is measured</b></td>
+            <td><span class="ar">صور مرئية</span><span class="en">Visual images</span></td>
+            <td><span class="ar">تغيّر الأشعة تحت الحمراء ضمن مجال الرؤية</span><span class="en">Infrared change within the sensor's field of view</span></td>
+            <td><span class="ar">قياسات قناة لاسلكية بين جهازين</span><span class="en">Wireless channel measurements between two devices</span></td></tr>
+          <tr><td><b class="ar">الخصوصية</b><b class="en">Privacy</b></td>
+            <td><span class="ar">تلتقط صورًا؛ حساسية خصوصية عالية وتتطلب سياسات وموافقات</span><span class="en">Captures images; high privacy sensitivity requiring policies and consent</span></td>
+            <td><span class="ar">لا صور؛ يُخرج عادةً إشارة حركة/وجود فقط</span><span class="en">No images; typically outputs only a motion/presence signal</span></td>
+            <td><span class="ar">لا صور، لكن القياسات قد تكشف أنماط نشاط؛ الخصوصية تعتمد على التصميم والتسجيل والاحتفاظ وضوابط الوصول</span><span class="en">No images, but measurements may still reveal activity patterns; privacy depends on design, logging, retention and access control</span></td></tr>
+          <tr><td><b class="ar">تكلفة النشر</b><b class="en">Deployment cost</b></td>
+            <td><span class="ar">متفاوتة بشدة حسب الجودة والتخزين</span><span class="en">Varies widely with quality and storage</span></td>
+            <td><span class="ar">منخفضة عادةً لكل حساس</span><span class="en">Generally low per sensor</span></td>
+            <td><span class="ar">تتطلب عتادًا متوافقًا؛ تكلفة النموذج الأولي متواضعة (انظر جدول المواد) وغير مُتحقَّق منها</span><span class="en">Needs compatible hardware; prototype cost is modest (see BOM) but unverified</span></td></tr>
+          <tr><td><b class="ar">تعقيد الإعداد</b><b class="en">Setup complexity</b></td>
+            <td><span class="ar">تركيب، زاوية رؤية، شبكة، تخزين</span><span class="en">Mounting, field of view, network, storage</span></td>
+            <td><span class="ar">بسيط عادةً؛ التغطية محدودة بخط الرؤية</span><span class="en">Usually simple; coverage limited to line of sight</span></td>
+            <td><span class="ar">برنامج ثابت، معايرة، ويعتمد على ترتيب الغرفة</span><span class="en">Firmware, calibration, and dependent on room layout</span></td></tr>
+          <tr><td><b class="ar">الحساسية البيئية</b><b class="en">Environmental sensitivity</b></td>
+            <td><span class="ar">الإضاءة والحواجز</span><span class="en">Lighting and occlusion</span></td>
+            <td><span class="ar">مصادر الحرارة وتيارات الهواء وموضع التركيب</span><span class="en">Heat sources, airflow, mounting position</span></td>
+            <td><span class="ar">تعدد المسارات، الأثاث، التداخل، تغيّر الراوتر</span><span class="en">Multipath, furniture, interference, router changes</span></td></tr>
+          <tr><td><b class="ar">الموثوقية</b><b class="en">Reliability</b></td>
+            <td><span class="ar">تقنية ناضجة لكن تحتاج هندسة وتقييمًا</span><span class="en">Mature but requires engineering and evaluation</span></td>
+            <td><span class="ar">ناضجة وشائعة للحركة البسيطة</span><span class="en">Mature and common for simple motion</span></td>
+            <td><span class="ar">مجال بحثي؛ يجب التحقق منها لكل بيئة</span><span class="en">Research-stage; must be validated per environment</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <span class="ar">CSI يحلل قياسات القناة وليس صور كاميرا. مع ذلك، تبقى الخصوصية مسألة تصميم: ما يُسجَّل، ولمدة كم، ومن يصل إليه.</span>
+      <span class="en">CSI analyzes channel measurements rather than camera images. Privacy still depends on system design: what is logged, for how long, and who can access it.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= D. HOW CSI WORKS ================= -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">03 · How Wi-Fi CSI Works</span>
+      <h2><span class="ar">كيف يعمل Wi-Fi CSI</span><span class="en">How Wi-Fi CSI Works</span></h2>
+      <p class="lead ar">اضغط على أي خطوة لرؤية ما يحدث. قد تتضمن CSI سعة وطور القناة حسب دعم العتاد والبرنامج الثابت.</p>
+      <p class="lead en">Select a step to see what happens. CSI may include channel amplitude and phase depending on hardware and firmware support.</p>
+    </div>
+    <div class="card wm">
+      <svg viewBox="0 0 760 120" role="img" aria-label="Pipeline: TX, RX CSI, motion, Python, algorithm, backend and database, dashboard" style="width:100%;height:auto;direction:ltr">
+        <path d="M60 60 H700" stroke="var(--border)" stroke-width="3" stroke-dasharray="6 6"/>
+        <g class="hn" data-n="1"><rect x="6" y="30" width="96" height="60" rx="12"/><text x="54" y="56">1</text><text x="54" y="74">TX packets</text></g>
+        <g class="hn" data-n="2"><rect x="114" y="30" width="96" height="60" rx="12"/><text x="162" y="56">2</text><text x="162" y="74">RX · CSI</text></g>
+        <g class="hn" data-n="3"><rect x="222" y="30" width="96" height="60" rx="12"/><text x="270" y="56">3</text><text x="270" y="74">Motion</text></g>
+        <g class="hn" data-n="4"><rect x="330" y="30" width="96" height="60" rx="12"/><text x="378" y="56">4</text><text x="378" y="74">Python</text></g>
+        <g class="hn" data-n="5"><rect x="438" y="30" width="96" height="60" rx="12"/><text x="486" y="56">5</text><text x="486" y="74">Algorithm</text></g>
+        <g class="hn" data-n="6"><rect x="546" y="30" width="96" height="60" rx="12"/><text x="594" y="56">6</text><text x="594" y="74">Backend · DB</text></g>
+        <g class="hn" data-n="7"><rect x="654" y="30" width="96" height="60" rx="12"/><text x="702" y="56">7</text><text x="702" y="74">Dashboard</text></g>
+      </svg>
+      <div class="steps" id="how-steps"></div>
+      <div class="how-panel">
+        <div class="card detail" id="how-detail" aria-live="polite"></div>
+        <div class="card">
+          <h3><i data-lucide="waves"></i><span class="ar">لماذا قد تتغير القياسات؟</span><span class="en">Why can measurements change?</span></h3>
+          <p class="ar">الموجات اللاسلكية تنعكس وتتشتت على الجدران والأثاث والأجسام. حركة جسم في مسار الإشارة قد تغيّر نمط التداخل، فيتغير CSI. لكن الأثاث والأبواب والتداخل اللاسلكي قد تسبب تغيّرات مماثلة، وهذا مصدر الإنذارات الكاذبة.</p>
+          <p class="en">Radio waves reflect and scatter off walls, furniture and bodies. A moving body in the signal path may change the interference pattern and therefore the CSI. Furniture, doors and wireless interference can cause similar changes — a source of false alarms.</p>
+          <div class="no-print" style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <button class="btn sm" id="how-prev" type="button"><i data-lucide="chevron-left"></i><span class="ar">السابق</span><span class="en">Previous</span></button>
+            <button class="btn sm" id="how-next" type="button"><span class="ar">التالي</span><span class="en">Next</span><i data-lucide="chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h3 style="margin-top:2rem"><span class="ar">قاموس المصطلحات</span><span class="en">Technical glossary</span></h3>
+    <div id="glossary"></div>
+  </div>
+</section>
+
+<!-- ================= E. ARCHITECTURE ================= -->
+<section class="section" id="arch">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">04 · System Architecture</span>
+      <h2><span class="ar">معمارية النظام</span><span class="en">System Architecture</span></h2>
+      <p class="lead ar">اضغط على أي مكوّن لعرض غرضه ومدخلاته ومخرجاته والفريق المسؤول والاعتماديات.</p>
+      <p class="lead en">Select a component to see its purpose, inputs, outputs, responsible team and dependencies.</p>
+    </div>
+    <div class="flow" id="arch-flow" role="group" aria-label="Architecture components"></div>
+    <p class="sr-only ar">النص البديل للمخطط: مُرسِل ESP32 يرسل حزم لاسلكية إلى مستقبِل ESP32 يستخرج CSI، ثم طبقة جمع بيانات بايثون، ثم معالجة إشارة بالذكاء الاصطناعي، ثم واجهة برمجية خلفية، ثم قاعدة بيانات، ثم لوحة تحكم أمامية.</p>
+    <p class="sr-only en">Text alternative: an ESP32 transmitter sends wireless packets to an ESP32 receiver that extracts CSI, followed by a Python acquisition layer, AI signal processing, a backend API, a database, and a frontend dashboard.</p>
+    <div class="card detail wm" id="arch-detail" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ================= F. FEASIBILITY ================= -->
+<section class="section" id="feasibility">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">05 · Technical Feasibility</span>
+      <h2><span class="ar">الجدوى التقنية</span><span class="en">Technical Feasibility</span></h2>
+    </div>
+    <div class="grid g3">
+      <article class="card wm"><h3 style="color:var(--ok)"><i data-lucide="check-circle-2"></i><span class="ar">ممكن في النموذج الأول</span><span class="en">Feasible in the first prototype</span></h3>
+        <ul class="ar"><li>بناء وتحميل المثال الرسمي على لوحات متوافقة</li><li>تسجيل عيّنات CSI في غرفة اختبار مضبوطة</li><li>كاشف أساسي بالعتبة للتمييز بين الحركة والسكون</li><li>تخزين الأحداث في SQLite وعرضها</li></ul>
+        <ul class="en"><li>Build and flash the official example on compatible boards</li><li>Record CSI samples in a controlled test room</li><li>Threshold-based baseline to separate motion from stillness</li><li>Store events in SQLite and display them</li></ul></article>
+      <article class="card wm"><h3 style="color:var(--warn)"><i data-lucide="flask-conical"></i><span class="ar">يتطلب بحثًا إضافيًا</span><span class="en">Needs additional research</span></h3>
+        <ul class="ar"><li>الثبات عبر غرف وترتيبات أثاث مختلفة</li><li>هل يتفوق نموذج تعلم آلي على العتبة؟</li><li>المعايرة التلقائية والانجراف الزمني</li><li>زمن الاستجابة الفعلي وأدائه على حاسوب محدود</li></ul>
+        <ul class="en"><li>Robustness across rooms and furniture layouts</li><li>Whether an ML model beats a simple threshold</li><li>Automatic calibration and drift over time</li><li>Real latency and performance on a limited laptop</li></ul></article>
+      <article class="card wm"><h3 style="color:var(--bad)"><i data-lucide="ban"></i><span class="ar">خارج نطاق MVP</span><span class="en">Outside MVP scope</span></h3>
+        <ul class="ar"><li>تحديد هوية الأشخاص أو عدّهم أو تحديد مواقعهم</li><li>العلامات الحيوية أو التعرف على الإيماءات</li><li>ضمانات عبر الجدران أو في كل بيئة</li><li>أمن وامتثال الإنتاج والتصنيع التجاري</li></ul>
+        <ul class="en"><li>Identifying, counting or locating people</li><li>Vital signs or gesture recognition</li><li>Through-wall or every-environment guarantees</li><li>Production security/compliance and commercial manufacturing</li></ul></article>
+    </div>
+    <div class="grid g3" style="margin-top:1rem">
+      <div class="card"><h3><i data-lucide="circuit-board"></i><span class="ar">لماذا يهم توافق اللوحة والبرنامج الثابت</span><span class="en">Why board and firmware compatibility matter</span></h3>
+        <p class="ar">استخراج CSI يعتمد على دعم الشريحة وإصدار ESP-IDF وأمثلة ESP-CSI الرسمية. لوحة غير مدعومة أو إصدار غير مطابق قد لا يُخرج CSI إطلاقًا. افحص المستودع الرسمي واللوحة قبل الشراء والتحميل.</p>
+        <p class="en">CSI extraction depends on chip support, the ESP-IDF version and the official ESP-CSI examples. An unsupported board or mismatched version may not output CSI at all. Inspect the official repository and the board before buying or flashing.</p></div>
+      <div class="card"><h3><i data-lucide="database"></i><span class="ar">لماذا نحتاج عيّنات CSI حقيقية</span><span class="en">Why real CSI samples are necessary</span></h3>
+        <p class="ar">شكل الإشارة وضجيجها وتأثير الغرفة لا يمكن تخمينها. العتبات والنماذج يجب أن تُضبط وتُقيَّم على تسجيلات حقيقية مفصولة عن بيانات الضبط.</p>
+        <p class="en">Signal shape, noise and room effects cannot be guessed. Thresholds and models must be tuned and evaluated on real recordings kept separate from tuning data.</p></div>
+      <div class="card"><h3><i data-lucide="flask-round"></i><span class="ar">لماذا لا تثبت المحاكاة دقة واقعية</span><span class="en">Why simulation cannot establish accuracy</span></h3>
+        <p class="ar">البيانات المحاكاة تُولَّد بقواعد نحن من وضعها، فهي تعكس افتراضاتنا لا الواقع. تصلح لتجربة الواجهة فقط.</p>
+        <p class="en">Simulated data is produced by rules we wrote, so it reflects our assumptions, not reality. It is useful only for exercising the interface.</p></div>
+    </div>
+    <h3 style="margin-top:2rem"><span class="ar">سجل المخاطر التقنية</span><span class="en">Technical risk register</span></h3>
+    <p class="muted small ar">الاحتمال والأثر تقديرات أولية بحسب الحكم الهندسي، وليست قياسات.</p>
+    <p class="muted small en">Probability and impact are preliminary engineering judgments, not measurements.</p>
+    <div class="tbl-wrap" id="risk-tech"></div>
+  </div>
+</section>
+
+<!-- ================= G. HARDWARE & SOFTWARE ================= -->
+<section class="section" id="hardware">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">06 · Hardware &amp; Software</span>
+      <h2><span class="ar">متطلبات العتاد والبرمجيات</span><span class="en">Hardware and Software Requirements</span></h2>
+      <p class="lead ar">جدول مواد قابل للتعديل. الأسعار بالجنيه المصري <b>تقديرات تخطيطية أولية وليست عروض أسعار</b>.</p>
+      <p class="lead en">An editable bill of materials. Egyptian-pound prices are <b>provisional planning estimates, not vendor quotations</b>.</p>
+    </div>
+    <div class="note warn">
+      <span class="ar">تاريخ التقدير: 17 أكتوبر 2026 (تقدير تخطيطي). يجب التأكد من الأسعار الحالية لدى الموردين قبل الشراء.</span>
+      <span class="en">Estimate date: 17 October 2026 (planning estimate). Confirm current vendor prices before purchasing.</span>
+    </div>
+    <div class="tbl-wrap wm">
+      <table class="tbl" id="bom-table">
+        <thead><tr>
+          <th><span class="ar">البند</span><span class="en">Item</span></th>
+          <th class="num"><span class="ar">الكمية</span><span class="en">Qty</span></th>
+          <th class="num"><span class="ar">سعر الوحدة (أدنى)</span><span class="en">Unit low</span></th>
+          <th class="num"><span class="ar">سعر الوحدة (أعلى)</span><span class="en">Unit high</span></th>
+          <th><span class="ar">متوفر لدينا</span><span class="en">Already have</span></th>
+          <th class="num"><span class="ar">إجمالي (أدنى)</span><span class="en">Line low</span></th>
+          <th class="num"><span class="ar">إجمالي (أعلى)</span><span class="en">Line high</span></th>
+          <th><span class="sr-only">Remove</span></th>
+        </tr></thead>
+        <tbody id="bom-body"></tbody>
+        <tfoot id="bom-foot"></tfoot>
+      </table>
+    </div>
+    <div class="controls no-print" style="margin-top:.8rem">
+      <button class="btn sm" id="bom-add" type="button"><i data-lucide="plus"></i><span class="ar">إضافة بند</span><span class="en">Add item</span></button>
+      <button class="btn sm" id="bom-csv" type="button"><i data-lucide="download"></i><span class="ar">تصدير CSV</span><span class="en">Export CSV</span></button>
+      <button class="btn sm" id="bom-print" type="button"><i data-lucide="printer"></i><span class="ar">طباعة</span><span class="en">Print</span></button>
+      <button class="btn sm danger" id="bom-reset" type="button"><i data-lucide="rotate-ccw"></i><span class="ar">استعادة الافتراضي</span><span class="en">Restore defaults</span></button>
+    </div>
+    <p class="muted small" style="margin-top:.6rem"><span class="ar">هذا الجدول يغطي <b>تكلفة العتاد فقط</b>. البرمجيات والاستضافة المتكررة والعمالة وتكلفة التصنيع التجاري تُعامل منفصلة في الحاسبة أدناه.</span><span class="en">This table covers <b>hardware cost only</b>. Software, recurring hosting, labor and commercial manufacturing cost are handled separately in the calculator below.</span></p>
+
+    <h3 style="margin-top:2rem"><span class="ar">متطلبات البرمجيات</span><span class="en">Software requirements</span></h3>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th><span class="ar">الأداة</span><span class="en">Tool</span></th><th><span class="ar">الغرض</span><span class="en">Purpose</span></th></tr></thead>
+        <tbody>
+          <tr><td>ESP-IDF</td><td><span class="ar">بناء وتحميل البرنامج الثابت</span><span class="en">Build and flash firmware</span></td></tr>
+          <tr><td>Git + VS Code</td><td><span class="ar">إدارة الإصدارات والتحرير</span><span class="en">Version control and editing</span></td></tr>
+          <tr><td>Python</td><td><span class="ar">جمع البيانات والمعالجة</span><span class="en">Acquisition and processing</span></td></tr>
+          <tr><td>NumPy, pandas, SciPy, Matplotlib, scikit-learn</td><td><span class="ar">تحليل الإشارة والتصور والتعلم الآلي</span><span class="en">Signal analysis, plotting, machine learning</span></td></tr>
+          <tr><td>Flask <span class="ar">أو</span><span class="en">or</span> FastAPI</td><td><span class="ar">الواجهة البرمجية الخلفية</span><span class="en">Backend API</span></td></tr>
+          <tr><td>SQLite</td><td><span class="ar">تخزين الأحداث</span><span class="en">Event storage</span></td></tr>
+          <tr><td>HTML, CSS, JavaScript, Chart.js</td><td><span class="ar">لوحة التحكم</span><span class="en">Dashboard</span></td></tr>
+          <tr><td><span class="ar">Figma أو بديل (مثل Penpot)</span><span class="en">Figma or an alternative (e.g., Penpot)</span></td><td><span class="ar">تصميم الواجهة</span><span class="en">UI design</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note ok"><span class="ar">الأدوات مفتوحة المصدر تجعل تكلفة برمجيات النموذج الأولي صفرية فعليًا، <b>باستثناء</b> الإنترنت والمعدات والاستضافة وأي خدمات مدفوعة اختيارية.</span><span class="en">Open-source tools can make prototype software cost effectively zero, <b>excluding</b> internet, equipment, hosting and optional paid services.</span></div>
+  </div>
+</section>
+
+<!-- ================= H. BUDGET ================= -->
+<section class="section" id="budget">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">07 · Interactive Feasibility Budget</span>
+      <h2><span class="ar">حاسبة ميزانية الجدوى</span><span class="en">Interactive Feasibility Budget</span></h2>
+      <p class="lead ar">سيناريوهات تخطيطية أولية وليست عروض أسعار. عدّل أي رقم. لا تُضاف مصروفات متكررة ما لم تُدخلها بنفسك.</p>
+      <p class="lead en">Preliminary planning scenarios, not quotes. Adjust any value. No recurring expense is added unless you configure it.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card wm">
+        <h3><i data-lucide="sliders-horizontal"></i><span class="ar">الإعدادات</span><span class="en">Inputs</span></h3>
+        <fieldset style="border:0;padding:0;margin:0 0 .8rem">
+          <legend class="small muted" style="font-weight:700"><span class="ar">السيناريو</span><span class="en">Scenario</span></legend>
+          <div id="scen-radios" style="display:grid;gap:.4rem"></div>
+        </fieldset>
+        <div class="fields">
+          <label class="field"><span><span class="ar">الحد الأدنى (EGP)</span><span class="en">Minimum (EGP)</span></span><input type="number" id="bud-lo" min="0" step="50" inputmode="decimal"></label>
+          <label class="field"><span><span class="ar">الحد الأقصى (EGP)</span><span class="en">Maximum (EGP)</span></span><input type="number" id="bud-hi" min="0" step="50" inputmode="decimal"></label>
+          <label class="field"><span><span class="ar">احتياطي طوارئ (%)</span><span class="en">Contingency (%)</span></span><input type="number" id="bud-cont" min="0" max="100" step="1" inputmode="decimal"></label>
+          <label class="field"><span><span class="ar">خصم معدات متوفرة (EGP)</span><span class="en">Available-equipment deduction (EGP)</span></span><input type="number" id="bud-ded" min="0" step="50" inputmode="decimal"></label>
+          <label class="field"><span><span class="ar">برمجيات مدفوعة، مرة واحدة (EGP)</span><span class="en">Paid software, one-time (EGP)</span></span><input type="number" id="bud-soft" min="0" step="50" inputmode="decimal"></label>
+          <label class="field"><span><span class="ar">عمالة، مرة واحدة (EGP)</span><span class="en">Labor, one-time (EGP)</span></span><input type="number" id="bud-labor" min="0" step="100" inputmode="decimal"></label>
+          <label class="field"><span><span class="ar">متكرر شهريًا: استضافة/اشتراكات (EGP)</span><span class="en">Recurring monthly: hosting/subscriptions (EGP)</span></span><input type="number" id="bud-rec" min="0" step="10" inputmode="decimal"></label>
+          <label class="field"><span><span class="ar">عدد الأشهر</span><span class="en">Number of months</span></span><input type="number" id="bud-months" min="0" max="120" step="1" inputmode="numeric"></label>
+        </div>
+        <div class="controls no-print" style="margin-top:.8rem">
+          <button class="btn sm" id="bud-from-bom" type="button"><i data-lucide="table"></i><span class="ar">استخدم صافي جدول المواد</span><span class="en">Use BOM net totals</span></button>
+        </div>
+        <p class="muted small" id="bud-hint"></p>
+      </div>
+      <div class="card wm" id="bud-out" aria-live="polite"></div>
+    </div>
+    <div class="note" style="margin-top:1rem"><span class="ar">النطاقات الأولية: اقتصادي 1,500–2,500؛ MVP قياسي 2,500–4,500؛ موسّع 4,500–7,000+ جنيه. تكلفة العتاد منفصلة عن البرمجيات والاستضافة والعمالة والتصنيع التجاري (خارج نطاق هذه الدراسة).</span><span class="en">Initial ranges: economical 1,500–2,500; standard MVP 2,500–4,500; expanded 4,500–7,000+ EGP. Hardware cost is separate from software, hosting, labor and commercial manufacturing (outside this study's scope).</span></div>
+  </div>
+</section>
+
+<!-- ================= I. TEAM ================= -->
+<section class="section" id="team">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">08 · Team Structure</span>
+      <h2><span class="ar">هيكل الفريق والمسؤوليات (12 عضوًا)</span><span class="en">Team Structure and Responsibilities (12 members)</span></h2>
+      <p class="lead ar">لا توجد أسماء أفراد. علّم المهام المنجزة؛ تُحفظ محليًا في متصفحك.</p>
+      <p class="lead en">No individual names are used. Tick completed tasks; progress is stored locally in your browser.</p>
+    </div>
+    <div class="grid g2" id="teams"></div>
+    <div class="controls no-print" style="margin-top:1rem">
+      <button class="btn sm" id="ex-tasks-team" type="button"><i data-lucide="clipboard-copy"></i><span class="ar">نسخ كل مهام الفريق</span><span class="en">Copy all team tasks</span></button>
+      <button class="btn sm danger" id="tasks-reset" type="button"><i data-lucide="rotate-ccw"></i><span class="ar">مسح تقدم المهام</span><span class="en">Clear task progress</span></button>
+    </div>
+    <h3 style="margin-top:2rem"><span class="ar">مصفوفة المسؤوليات</span><span class="en">Responsibility matrix</span></h3>
+    <p class="muted small"><b>R</b> = <span class="ar">مسؤول رئيسي</span><span class="en">Responsible</span> · <b>S</b> = <span class="ar">داعم</span><span class="en">Supporting</span></p>
+    <div class="tbl-wrap" id="matrix"></div>
+  </div>
+</section>
+
+<!-- ================= J. LIVE DASHBOARD DEMO ================= -->
+<section class="section" id="demo">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">09 · Live Dashboard Demo</span>
+      <h2><span class="ar">لوحة التحكم التفاعلية (عرض تجريبي)</span><span class="en">Interactive Dashboard Demo</span></h2>
+      <p class="lead ar">كل ما هنا <b>بيانات محاكاة</b> مولّدة بمولّد أرقام عشوائية ثابت البذرة. الخوارزمية هي تباين نافذة منزلقة مقابل عتبة قابلة للتعديل — أداة توضيح فقط وليست نموذج كشف CSI مُتحقَّقًا منه.</p>
+      <p class="lead en">Everything here is <b>simulated data</b> from a seeded pseudo-random generator. The algorithm is sliding-window variance versus an adjustable threshold — a visualization placeholder, not a validated CSI detection model.</p>
+    </div>
+    <div class="dash wm-tile" id="dash">
+      <div class="dash-top">
+        <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+          <span class="badge-demo"><i data-lucide="flask-conical" style="width:14px;height:14px"></i> DEMO / SIMULATED DATA</span>
+          <span class="muted small mono" dir="ltr">source = simulated_demo</span>
+        </div>
+        <div class="controls">
+          <label class="field" style="min-width:140px"><span class="sr-only"><span class="ar">الغرفة</span><span class="en">Room</span></span>
+            <select id="demo-room"><option value="room_01">room_01</option><option value="room_02">room_02</option><option value="room_03">room_03</option></select></label>
+          <button class="btn primary sm" id="demo-start" type="button"><i data-lucide="play"></i><span class="ar">بدء العرض</span><span class="en">Start Demo</span></button>
+          <button class="btn sm" id="demo-pause" type="button" disabled><i data-lucide="pause"></i><span class="ar">إيقاف مؤقت</span><span class="en">Pause Demo</span></button>
+          <button class="btn sm" id="demo-reset" type="button"><i data-lucide="rotate-ccw"></i><span class="ar">إعادة ضبط</span><span class="en">Reset Demo</span></button>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div>
+          <div class="status-card idle" id="demo-status" aria-live="polite">
+            <div class="muted small"><span class="ar">الحالة الحالية (محاكاة)</span><span class="en">Current status (simulated)</span></div>
+            <div class="state" id="demo-state">—</div>
+            <div class="kv">
+              <span><span class="ar">الاتصال</span><span class="en">Connection</span></span><span id="demo-conn">—</span>
+              <span><span class="ar">آخر تحديث</span><span class="en">Last update</span></span><span id="demo-last">—</span>
+              <span><span class="ar">العينة #</span><span class="en">Sample #</span></span><span id="demo-sample">0</span>
+              <span><span class="ar">التباين الحالي</span><span class="en">Current variance</span></span><span id="demo-var">—</span>
+              <span><span class="ar">العتبة</span><span class="en">Threshold</span></span><span id="demo-thr-val">2.0</span>
+            </div>
+          </div>
+          <div style="margin-top:.8rem" class="card">
+            <label class="field"><span><span class="ar">عتبة الكشف (تباين النافذة)</span><span class="en">Detection threshold (window variance)</span></span>
+              <input type="range" id="demo-thr" min="0.2" max="10" step="0.1" value="2.0"></label>
+            <label class="toggle"><input type="checkbox" id="demo-force"><span><span class="ar">محاكاة حركة (تجاوز يدوي)</span><span class="en">Simulate motion (manual override)</span></span></label>
+          </div>
+        </div>
+        <div>
+          <div class="chart-box"><canvas id="chart-signal" role="img" aria-label="Simulated signal amplitude over time"></canvas><div class="fallback-box" id="chart-fallback"><span class="ar">تعذّر تحميل مكتبة Chart.js (قد تكون الشبكة غير متاحة). تبقى بطاقة الحالة وسجل الأحداث تعمل.</span><span class="en">Chart.js could not be loaded (network may be unavailable). The status card and event log still work.</span></div></div>
+          <div class="chart-box"><canvas id="chart-var" role="img" aria-label="Simulated window variance versus threshold"></canvas></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-top:.5rem">
+        <h3 style="margin:0"><span class="ar">سجل الأحداث الأخيرة</span><span class="en">Recent event log</span></h3>
+        <button class="btn sm" id="demo-csv" type="button"><i data-lucide="download"></i><span class="ar">تصدير الأحداث CSV</span><span class="en">Export events CSV</span></button>
+      </div>
+      <div class="tbl-wrap" style="margin-top:.5rem"><table class="tbl"><thead><tr>
+        <th><span class="ar">الوقت (UTC)</span><span class="en">Time (UTC)</span></th><th><span class="ar">العينة</span><span class="en">Sample</span></th><th><span class="ar">الغرفة</span><span class="en">Room</span></th><th><span class="ar">الحدث</span><span class="en">Event</span></th><th class="num"><span class="ar">التباين</span><span class="en">Variance</span></th><th><span class="ar">المصدر</span><span class="en">Source</span></th></tr></thead>
+        <tbody id="demo-log"></tbody></table></div>
+    </div>
+    <p class="muted small" style="margin-top:.6rem"><span class="ar">«الغرفة» هنا مجرد ضبط لبذرة ومستوى ضجيج المحاكاة. كل الأحداث موسومة <span class="mono">simulated_demo</span> ولا تمثل قراءات حساس حقيقية. قد تُسبب بعض الغرف إنذارات كاذبة عند عتبة منخفضة — وهذا مقصود لتوضيح المفاضلة.</span><span class="en">“Room” is only a seed and noise-level preset for the simulation. Every event is tagged <span class="mono">simulated_demo</span> and is not a real sensor reading. Some rooms may trigger false alarms at low thresholds — intentionally, to illustrate the trade-off.</span></p>
+  </div>
+</section>
+
+<!-- ================= K. ALGORITHM ================= -->
+<section class="section" id="algo">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">10 · AI &amp; Signal Processing</span>
+      <h2><span class="ar">الذكاء الاصطناعي ومعالجة الإشارة</span><span class="en">AI Algorithm and Signal Processing</span></h2>
+    </div>
+    <div class="grid g2">
+      <div class="card wm"><h3><i data-lucide="list-ordered"></i><span class="ar">خط المعالجة الأساسي</span><span class="en">Baseline processing pipeline</span></h3>
+        <ol class="ar"><li>قراءة عينات CSI المزوّدة بطابع زمني.</li><li>تحليل القياسات المتاحة.</li><li>رفض العينات غير الصالحة.</li><li>التطبيع أو الترشيح <b>فقط عند وجود مبرر</b> من الإشارة.</li><li>حساب خصائص النوافذ.</li><li>المقارنة مع خط أساس أو مصنِّف مدرَّب.</li><li>تطبيق عتبة قرار موثقة.</li><li>التنعيم/التأخير (Debounce) عند الحاجة.</li><li>إرجاع حالة الحركة وثقة معايَرة اختيارية.</li></ol>
+        <ol class="en"><li>Read timestamped CSI samples.</li><li>Parse the available measurements.</li><li>Reject invalid samples.</li><li>Normalize or filter <b>only when justified</b> by the signal.</li><li>Calculate window-based features.</li><li>Compare with a baseline or trained classifier.</li><li>Apply a documented decision threshold.</li><li>Smooth or debounce predictions where appropriate.</li><li>Return motion status and optional calibrated confidence.</li></ol></div>
+      <div class="card wm"><h3><i data-lucide="gauge"></i><span class="ar">مقاييس التقييم</span><span class="en">Evaluation metrics</span></h3>
+        <ul class="ar"><li><b>Recall</b> = TP / (TP + FN): نسبة الحركة الحقيقية التي اكتُشفت.</li><li><b>Precision</b> = TP / (TP + FP): نسبة الإنذارات الصحيحة.</li><li><b>معدل الإيجابيات الكاذبة على مستوى النوافذ</b> = FP / (FP + TN).</li><li><b>زمن الاستجابة</b>: من بدء الحركة إلى ظهورها في اللوحة.</li></ul>
+        <ul class="en"><li><b>Recall</b> = TP / (TP + FN): share of real motion that was detected.</li><li><b>Precision</b> = TP / (TP + FP): share of alarms that were correct.</li><li><b>Window-level false-positive rate</b> = FP / (FP + TN).</li><li><b>Latency</b>: from motion start to appearing on the dashboard.</li></ul>
+        <div class="note warn"><span class="ar"><b>تسرّب المعلومات:</b> النوافذ المتجاورة متشابهة جدًا (تتداخل). التقسيم العشوائي على مستوى الصفوف يضع نوافذ شبه متطابقة في التدريب والاختبار فتنتفخ الدقة. افصل بحسب <b>جلسة التسجيل</b> أو الغرفة/اليوم.</span><span class="en"><b>Leakage:</b> neighboring windows overlap and are nearly identical. A random row-level split puts near-duplicates in both train and test, inflating scores. Split by <b>recording session</b> (or room/day) instead.</span></div></div>
+    </div>
+    <h3 style="margin-top:1.5rem"><span class="ar">واجهة الدالة التوضيحية</span><span class="en">Illustrative function interface</span></h3>
+    <div class="code"><div class="code-h"><span>python — placeholder</span><button class="btn sm" type="button" data-copy="#code-detect"><i data-lucide="copy"></i><span class="ar">نسخ</span><span class="en">Copy</span></button></div>
+<pre><code id="code-detect">def detect_motion(csi_window):
+    """
+    Input:
+        A validated window of CSI measurements.
+
+    Output:
+        A structured motion prediction.
+    """
+    raise NotImplementedError(
+        "Implement and validate with real CSI recordings."
+    )</code></pre></div>
+    <div class="note"><span class="ar">هذا الهيكل <b>ليس كاشفًا عاملًا عن قصد</b>؛ يجب تنفيذه والتحقق منه بتسجيلات CSI حقيقية.</span><span class="en">This placeholder is <b>intentionally not a functioning detector</b>; it must be implemented and validated with real CSI recordings.</span></div>
+    <h3><span class="ar">مثال تعليمي: تباين النافذة المنزلقة (NumPy)</span><span class="en">Educational example: sliding-window variance (NumPy)</span></h3>
+    <div class="code"><div class="code-h"><span>python — generic signal-processing demo</span><button class="btn sm" type="button" data-copy="#code-var"><i data-lucide="copy"></i><span class="ar">نسخ</span><span class="en">Copy</span></button></div>
+<pre><code id="code-var">import numpy as np
+
+def sliding_window_variance(x, window=50, step=10):
+    """Variance of each window of a 1-D signal.
+
+    Generic signal-processing demonstration - NOT a complete
+    Wi-Fi CSI algorithm.
+    """
+    x = np.asarray(x, dtype=float)
+    if x.ndim != 1:
+        raise ValueError("x must be 1-D")
+    if window &lt; 2 or window &gt; len(x):
+        raise ValueError("window must be in [2, len(x)]")
+    starts = range(0, len(x) - window + 1, step)
+    return np.array([np.var(x[s:s + window], ddof=1) for s in starts])</code></pre></div>
+    <h3><span class="ar">تقسيم بحسب الجلسة لتفادي التسرّب</span><span class="en">Session-based split to avoid leakage</span></h3>
+    <div class="code"><div class="code-h"><span>python — scikit-learn</span><button class="btn sm" type="button" data-copy="#code-split"><i data-lucide="copy"></i><span class="ar">نسخ</span><span class="en">Copy</span></button></div>
+<pre><code id="code-split">from sklearn.model_selection import GroupKFold
+
+# X: window features, y: motion/still label,
+# session_ids: one id per recording session (same id for all its windows)
+gkf = GroupKFold(n_splits=3)
+for train_idx, test_idx in gkf.split(X, y, groups=session_ids):
+    ...  # fit on train_idx, evaluate on test_idx</code></pre></div>
+  </div>
+</section>
+
+<!-- ================= L. BACKEND ================= -->
+<section class="section" id="backend">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">11 · Backend &amp; Database</span>
+      <h2><span class="ar">تصميم الواجهة الخلفية وقاعدة البيانات</span><span class="en">Backend and Database Design</span></h2>
+    </div>
+    <div class="grid g2">
+      <div>
+        <h3><span class="ar">مثال حمولة حدث</span><span class="en">Example event payload</span></h3>
+        <div class="code"><div class="code-h"><span>json</span><button class="btn sm" type="button" data-copy="#code-payload"><i data-lucide="copy"></i><span class="ar">نسخ</span><span class="en">Copy</span></button></div>
+<pre><code id="code-payload">{
+  "room_id": "room_01",
+  "motion_detected": true,
+  "confidence": 0.87,
+  "timestamp": "2026-10-17T14:00:00Z",
+  "source": "simulated_demo"
+}</code></pre></div>
+        <div class="note warn"><span class="ar">القيم توضيحية وليست نتائج مقاسة.</span><span class="en">These values are illustrative, not measured results.</span></div>
+        <h3><span class="ar">جدول الأحداث (SQLite)</span><span class="en">Event table (SQLite)</span></h3>
+        <div class="code"><div class="code-h"><span>sql</span><button class="btn sm" type="button" data-copy="#code-sql"><i data-lucide="copy"></i><span class="ar">نسخ</span><span class="en">Copy</span></button></div>
+<pre><code id="code-sql">CREATE TABLE IF NOT EXISTS events (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  room_id         TEXT    NOT NULL,
+  motion_detected INTEGER NOT NULL CHECK (motion_detected IN (0, 1)),
+  confidence      REAL    CHECK (confidence IS NULL OR (confidence BETWEEN 0 AND 1)),
+  timestamp_utc   TEXT    NOT NULL,  -- ISO 8601, e.g. 2026-10-17T14:00:00Z
+  source          TEXT    NOT NULL,  -- e.g. simulated_demo | esp32_live
+  metadata        TEXT               -- optional JSON string
+);
+CREATE INDEX IF NOT EXISTS idx_events_room_time
+  ON events (room_id, timestamp_utc);</code></pre></div>
+      </div>
+      <div>
+        <h3><span class="ar">نقاط النهاية المقترحة</span><span class="en">Suggested endpoints</span></h3>
+        <div class="tbl-wrap"><table class="tbl" style="min-width:0"><thead><tr><th>Method</th><th>Path</th><th><span class="ar">الغرض</span><span class="en">Purpose</span></th></tr></thead><tbody>
+          <tr><td class="mono">POST</td><td class="mono">/api/events</td><td><span class="ar">تسجيل حدث بعد التحقق</span><span class="en">Record a validated event</span></td></tr>
+          <tr><td class="mono">GET</td><td class="mono">/api/status</td><td><span class="ar">آخر حالة لكل غرفة</span><span class="en">Latest state per room</span></td></tr>
+          <tr><td class="mono">GET</td><td class="mono">/api/events</td><td><span class="ar">سجل الأحداث مع ترشيح وصفحات</span><span class="en">Event history with filter and paging</span></td></tr>
+          <tr><td class="mono">GET</td><td class="mono">/api/health</td><td><span class="ar">فحص صحة الخدمة</span><span class="en">Service health check</span></td></tr></tbody></table></div>
+        <h3 style="margin-top:1rem"><span class="ar">طلب واستجابة (توضيحي)</span><span class="en">Request and response (illustrative)</span></h3>
+        <div class="code"><div class="code-h"><span>http</span><button class="btn sm" type="button" data-copy="#code-http"><i data-lucide="copy"></i><span class="ar">نسخ</span><span class="en">Copy</span></button></div>
+<pre><code id="code-http">POST /api/events
+Content-Type: application/json
+
+{"room_id":"room_01","motion_detected":true,"confidence":0.87,
+ "timestamp":"2026-10-17T14:00:00Z","source":"simulated_demo"}
+
+-> 201 Created
+{"id": 1, "status": "stored"}
+
+POST /api/events   (invalid: confidence = 1.7)
+-> 422 Unprocessable Entity
+{"error": "validation_failed",
+ "details": [{"field": "confidence", "message": "must be between 0 and 1"}]}
+
+GET /api/health
+-> 200 OK
+{"status": "ok", "database": "reachable"}</code></pre></div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:1rem">
+      <div class="card"><h3><i data-lucide="shield-check"></i><span class="ar">التحقق والأخطاء</span><span class="en">Validation and errors</span></h3><p class="ar">تحقق من الأنواع والنطاقات (الثقة 0–1)، وارفض الحقول المجهولة أو الناقصة برمز 4xx واضح، وأعد أخطاء منظمة. لا تعرض تفاصيل داخلية في رسائل الخطأ.</p><p class="en">Validate types and ranges (confidence 0–1), reject missing or unknown fields with a clear 4xx, and return structured errors. Do not leak internals in error messages.</p></div>
+      <div class="card"><h3><i data-lucide="clock"></i><span class="ar">الطوابع الزمنية</span><span class="en">Timestamps</span></h3><p class="ar">استخدم ISO 8601 بتوقيت UTC، وسجّل وقت الاستقبال إلى جانب وقت القياس عند الحاجة، وتعامل مع انحراف الساعة.</p><p class="en">Use ISO 8601 in UTC, optionally record receive time alongside measurement time, and account for clock drift.</p></div>
+      <div class="card"><h3><i data-lucide="globe-lock"></i><span class="ar">CORS والنشر</span><span class="en">CORS and deployment</span></h3><p class="ar">CORS يلزم فقط إذا كانت اللوحة على أصل مختلف عن الواجهة الخلفية؛ فعّله لأصول محددة لا للجميع. نقطة العرض التجريبي ليست نشرًا إنتاجيًا: الإنتاج يحتاج مصادقة وHTTPS وتحديد معدل ونسخًا احتياطيًا وسياسة احتفاظ بالبيانات.</p><p class="en">CORS is needed only if the dashboard is on a different origin than the backend; allow specific origins, not everyone. A demo endpoint is not a production deployment: production needs authentication, HTTPS, rate limiting, backups and a data-retention policy.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= M. FRONTEND / UX ================= -->
+<section class="section" id="frontend">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">12 · Frontend &amp; UI/UX</span>
+      <h2><span class="ar">مواصفات الواجهة وتجربة المستخدم</span><span class="en">Frontend and UI/UX Specifications</span></h2>
+    </div>
+    <div class="grid g3">
+      <div class="card"><h3><i data-lucide="layout-dashboard"></i><span class="ar">التسلسل والتخطيط</span><span class="en">Hierarchy and layout</span></h3><p class="ar">الحالة الحالية أولًا، ثم الرسوم الزمنية، ثم سجل الأحداث، ثم الإعدادات. بطاقات قابلة لإعادة الاستخدام ومسافات متسقة.</p><p class="en">Current status first, then time-series charts, then event history, then settings. Reusable cards and consistent spacing.</p></div>
+      <div class="card"><h3><i data-lucide="smartphone"></i><span class="ar">الاستجابة وRTL/LTR</span><span class="en">Responsive and RTL/LTR</span></h3><p class="ar">تخطيط شبكي يتحول لعمود واحد على الجوال، واستخدام خصائص منطقية (inline-start/end) لدعم الاتجاهين.</p><p class="en">Grid layouts collapse to one column on mobile; logical properties (inline-start/end) support both directions.</p></div>
+      <div class="card"><h3><i data-lucide="accessibility"></i><span class="ar">إمكانية الوصول</span><span class="en">Accessibility</span></h3><p class="ar">تباين كافٍ، حالات تركيز واضحة، أهداف لمس لا تقل عن 44px، تسميات للمخططات، ولا يُعتمد على اللون وحده.</p><p class="en">Sufficient contrast, visible focus states, 44px touch targets, chart labels, and never color alone.</p></div>
+    </div>
+    <h3 style="margin-top:1.5rem"><span class="ar">حالات الواجهة المطلوبة</span><span class="en">Required UI states</span></h3>
+    <div class="state-demo" id="states"></div>
+    <p class="muted small" style="margin-top:.6rem"><span class="ar">الرسوم: وسيلة إيضاح ووسوم وأسطورة وتلميحات؛ الأيقونات من Lucide مفتوحة المصدر (عبر CDN)، وإن لم تُحمَّل فالواجهة تبقى صالحة للاستخدام.</span><span class="en">Charts use legends, axis titles and tooltips. Icons are open-source Lucide (via CDN); if it fails to load, the interface remains usable.</span></p>
+  </div>
+</section>
+
+<!-- ================= N. ROADMAP ================= -->
+<section class="section" id="roadmap">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">13 · Six-Week Roadmap</span>
+      <h2><span class="ar">خارطة الطريق لستة أسابيع</span><span class="en">Six-Week Implementation Roadmap</span></h2>
+      <p class="lead ar">الجدول <b>هدف وليس ضمانًا</b>. غيّر حالة كل مهمة؛ تُحفظ محليًا.</p>
+      <p class="lead en">The schedule is a <b>target, not a guarantee</b>. Change each task's status; it is stored locally.</p>
+    </div>
+    <div class="card wm">
+      <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap">
+        <b><span class="ar">التقدم الكلي</span><span class="en">Overall progress</span>: <span id="road-pct">0%</span></b>
+        <button class="btn sm danger no-print" id="road-reset" type="button"><i data-lucide="rotate-ccw"></i><span class="ar">إعادة ضبط الحالات</span><span class="en">Reset statuses</span></button>
+      </div>
+      <div class="progress" style="margin:.6rem 0 1rem" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="road-bar"><i id="road-fill" style="width:0%"></i></div>
+      <div class="tbl-wrap"><div class="gantt" id="gantt" role="table"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= O. TESTING ================= -->
+<section class="section" id="testing">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">14 · Testing &amp; Acceptance</span>
+      <h2><span class="ar">الاختبار ومعايير القبول</span><span class="en">Testing and Acceptance Criteria</span></h2>
+      <p class="lead ar">الأهداف التالية <b>أهداف داخلية وليست نتائج محققة</b>.</p>
+      <p class="lead en">The targets below are <b>internal goals, not achieved results</b>.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card"><div class="muted small">Recall</div><div style="font-size:1.6rem;font-weight:800;color:var(--cyan)">≥ 90%</div><div class="muted small"><span class="ar">في بروتوكول اختبار مضبوط ومعرَّف</span><span class="en">in a defined controlled test protocol</span></div></div>
+      <div class="card"><div class="muted small"><span class="ar">معدل الإيجابيات الكاذبة (نوافذ)</span><span class="en">False-positive window rate</span></div><div style="font-size:1.6rem;font-weight:800;color:var(--cyan)">&lt; 5%</div><div class="muted small"><span class="ar">على مجموعة اختبار ساكنة معرَّفة</span><span class="en">on a defined static test set</span></div></div>
+      <div class="card"><div class="muted small"><span class="ar">زمن تحديث اللوحة</span><span class="en">Dashboard update latency</span></div><div style="font-size:1.6rem;font-weight:800;color:var(--cyan)">≤ 2 s</div><div class="muted small"><span class="ar">إن دعمه التنفيذ</span><span class="en">if supported by the implementation</span></div></div>
+    </div>
+    <div class="note warn"><span class="ar">معدل الإيجابيات الكاذبة على مستوى النوافذ <b>لا يساوي</b> عدد الإنذارات الكاذبة في الساعة؛ فهما يقيسان أشياء مختلفة وتعتمد الثانية على طول النافذة والتداخل وزمن التشغيل.</span><span class="en">A window-level false-positive rate is <b>not equivalent</b> to false alarms per hour; they measure different things and the latter depends on window length, overlap and run time.</span></div>
+    <h3><span class="ar">قائمة الاختبار التفاعلية</span><span class="en">Interactive test checklist</span></h3>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th><span class="ar">حالة الاختبار</span><span class="en">Test case</span></th><th><span class="ar">ماذا نتحقق</span><span class="en">What to verify</span></th><th><span class="ar">الحالة</span><span class="en">Status</span></th></tr></thead><tbody id="tests"></tbody></table></div>
+    <h3 style="margin-top:2rem"><span class="ar">حاسبة المقاييس من بياناتك</span><span class="en">Metrics calculator from your data</span></h3>
+    <p class="muted small ar">أدخل أعداد اختبارك الفعلي. لا تُحسب أي مقاييس ولا تُقارن بالأهداف إلا من الأرقام التي تُدخلها.</p>
+    <p class="muted small en">Enter your actual test counts. Nothing is computed or compared to goals except from the numbers you supply.</p>
+    <div class="grid g2">
+      <div class="card"><div class="fields">
+        <label class="field"><span>TP (<span class="ar">حركة مكتشفة</span><span class="en">motion detected</span>)</span><input type="number" id="m-tp" min="0" step="1" inputmode="numeric"></label>
+        <label class="field"><span>FN (<span class="ar">حركة فائتة</span><span class="en">motion missed</span>)</span><input type="number" id="m-fn" min="0" step="1" inputmode="numeric"></label>
+        <label class="field"><span>FP (<span class="ar">إنذار كاذب</span><span class="en">false alarm windows</span>)</span><input type="number" id="m-fp" min="0" step="1" inputmode="numeric"></label>
+        <label class="field"><span>TN (<span class="ar">سكون صحيح</span><span class="en">still correct</span>)</span><input type="number" id="m-tn" min="0" step="1" inputmode="numeric"></label>
+        <label class="field"><span><span class="ar">أحداث إنذار كاذب (عدد)</span><span class="en">False-alarm events (count)</span></span><input type="number" id="m-fa" min="0" step="1" inputmode="numeric"></label>
+        <label class="field"><span><span class="ar">ساعات التشغيل الساكن</span><span class="en">Static run hours</span></span><input type="number" id="m-hours" min="0" step="0.1" inputmode="decimal"></label>
+        <label class="field"><span><span class="ar">زمن التحديث المقاس (ث)</span><span class="en">Measured update latency (s)</span></span><input type="number" id="m-lat" min="0" step="0.1" inputmode="decimal"></label>
+      </div></div>
+      <div class="card wm" id="m-out" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= P. RISKS ================= -->
+<section class="section" id="risks">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">15 · Risks &amp; Mitigation</span>
+      <h2><span class="ar">المخاطر وسبل التخفيف</span><span class="en">Risks and Mitigation</span></h2>
+      <p class="lead ar">يمكنك تحديث حالة كل خطر؛ تُحفظ محليًا.</p>
+      <p class="lead en">You can update each risk's status; it is stored locally.</p>
+    </div>
+    <div class="tbl-wrap" id="risk-all"></div>
+  </div>
+</section>
+
+<!-- ================= Q. COMMERCIAL ================= -->
+<section class="section" id="commercial">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">16 · Commercial Feasibility</span>
+      <h2><span class="ar">الجدوى التجارية</span><span class="en">Commercial Feasibility</span></h2>
+      <p class="lead ar">لا نقدّم حجم سوق أو توقعات مبيعات أو هوامش ربح أو طلبًا مؤكدًا أو مقارنات منافسين مُتحقَّقًا منها لعدم توفر أدلة موثوقة هنا.</p>
+      <p class="lead en">We present no market size, sales forecasts, margins, verified demand or competitor comparisons because no reliable evidence is included here.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h3><i data-lucide="store"></i><span class="ar">أسواق محتملة</span><span class="en">Potential markets</span></h3>
+        <ul class="ar"><li>المنازل الذكية</li><li>إشغال المكاتب</li><li>قاعات الاجتماعات</li><li>إدارة الطاقة في المباني الذكية</li><li>النماذج البحثية والتعليمية</li></ul>
+        <ul class="en"><li>Smart homes</li><li>Office occupancy</li><li>Meeting rooms</li><li>Smart-building energy management</li><li>Research and educational prototypes</li></ul></div>
+      <div class="card"><h3><i data-lucide="briefcase"></i><span class="ar">نماذج أعمال ممكنة</span><span class="en">Possible business models</span></h3>
+        <ul class="ar"><li>تركيب العتاد</li><li>اشتراك اختياري للوحة المراقبة</li><li>نشر مخصص</li><li>خدمات بحثية وتكامل</li></ul>
+        <ul class="en"><li>Hardware installation</li><li>Optional monitoring-dashboard subscription</li><li>Custom deployments</li><li>Research and integration services</li></ul></div>
+    </div>
+    <div class="note bad"><span class="ar"><b>الفرق:</b> النموذج الأكاديمي الأولي ليس منتجًا تجاريًا مُتحقَّقًا منه. الانتقال إلى منتج يتطلب تحققًا ميدانيًا واسعًا، وأمنًا وخصوصية، وشهادات الامتثال اللاسلكي، وتصنيعًا ودعمًا.</span><span class="en"><b>Distinction:</b> the academic prototype is not a validated commercial product. Becoming one requires extensive field validation, security and privacy work, wireless regulatory compliance, manufacturing and support.</span></div>
+    <h3><span class="ar">حاسبة افتراضات (فارغة افتراضيًا)</span><span class="en">Assumptions calculator (empty by default)</span></h3>
+    <p class="muted small ar">كل المدخلات افتراضات خاصة بك وليست توقعات. تبقى النتائج «—» حتى تُدخل أرقامًا.</p>
+    <p class="muted small en">All inputs are your own assumptions, not forecasts. Results stay “—” until you enter numbers.</p>
+    <div class="grid g2">
+      <div class="card"><div class="fields">
+        <label class="field"><span><span class="ar">عدد الوحدات (مرة واحدة)</span><span class="en">Units (one-time)</span></span><input type="number" id="c-units" min="0" step="1" inputmode="numeric"></label>
+        <label class="field"><span><span class="ar">سعر البيع للوحدة (EGP)</span><span class="en">Price per unit (EGP)</span></span><input type="number" id="c-price" min="0" step="10" inputmode="decimal"></label>
+        <label class="field"><span><span class="ar">تكلفة الوحدة (EGP)</span><span class="en">Cost per unit (EGP)</span></span><input type="number" id="c-cost" min="0" step="10" inputmode="decimal"></label>
+        <label class="field"><span><span class="ar">عدد المشتركين</span><span class="en">Subscribers</span></span><input type="number" id="c-subs" min="0" step="1" inputmode="numeric"></label>
+        <label class="field"><span><span class="ar">رسوم شهرية للمشترك (EGP)</span><span class="en">Monthly fee per subscriber (EGP)</span></span><input type="number" id="c-fee" min="0" step="1" inputmode="decimal"></label>
+        <label class="field"><span><span class="ar">تكلفة الاستضافة الشهرية (EGP)</span><span class="en">Monthly hosting cost (EGP)</span></span><input type="number" id="c-host" min="0" step="1" inputmode="decimal"></label>
+      </div></div>
+      <div class="card wm" id="c-out" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= R. REPO ================= -->
+<section class="section" id="repo">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">17 · Documentation &amp; Repository</span>
+      <h2><span class="ar">التوثيق وهيكل المستودع</span><span class="en">Project Documentation and Repository</span></h2>
+    </div>
+    <div class="note warn"><span class="ar">هذا هيكل <b>مقترح</b>. يجب فحص المستودع الفعلي قبل الادعاء بأن هذه المجلدات أو التنفيذات موجودة.</span><span class="en">This is a <b>proposed</b> structure. The actual repository must be inspected before claiming these folders or implementations already exist.</span></div>
+    <div class="card wm">
+      <div class="controls no-print" style="margin-bottom:.6rem">
+        <button class="btn sm" id="tree-open" type="button"><i data-lucide="folder-open"></i><span class="ar">توسيع الكل</span><span class="en">Expand all</span></button>
+        <button class="btn sm" id="tree-close" type="button"><i data-lucide="folder-closed"></i><span class="ar">طي الكل</span><span class="en">Collapse all</span></button>
+        <button class="btn sm" id="tree-copy" type="button"><i data-lucide="copy"></i><span class="ar">نسخ الشجرة</span><span class="en">Copy tree</span></button>
+      </div>
+      <div class="tree" id="tree"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= S. EXPORT ================= -->
+<section class="section" id="export">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">18 · Print &amp; Export</span>
+      <h2><span class="ar">الطباعة والتصدير</span><span class="en">Print and Export</span></h2>
+      <p class="lead ar">«حفظ كـ PDF» يتم عبر مربع حوار الطباعة في متصفحك؛ لا يُنشأ ملف PDF من داخل الموقع.</p>
+      <p class="lead en">“Save as PDF” uses your browser's print dialog; the site itself does not generate a PDF file.</p>
+    </div>
+    <div class="grid g3 no-print">
+      <button class="btn primary" id="ex-print" type="button"><i data-lucide="printer"></i><span class="ar">طباعة / حفظ كـ PDF</span><span class="en">Print / Save as PDF</span></button>
+      <button class="btn" id="ex-bom" type="button"><i data-lucide="file-spreadsheet"></i><span class="ar">تصدير جدول المواد CSV</span><span class="en">Export BOM CSV</span></button>
+      <button class="btn" id="ex-events" type="button"><i data-lucide="file-down"></i><span class="ar">تصدير أحداث العرض CSV</span><span class="en">Export demo events CSV</span></button>
+      <button class="btn" id="ex-summary" type="button"><i data-lucide="copy"></i><span class="ar">نسخ ملخص المشروع</span><span class="en">Copy project summary</span></button>
+      <button class="btn" id="ex-tasks" type="button"><i data-lucide="clipboard-copy"></i><span class="ar">نسخ مهام الفرق</span><span class="en">Copy team tasks</span></button>
+      <button class="btn purple" id="ex-md" type="button"><i data-lucide="file-text"></i><span class="ar">تنزيل التوثيق (Markdown)</span><span class="en">Download documentation (Markdown)</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SOURCES ================= -->
+<section class="section" id="sources">
+  <div class="container">
+    <div class="sec-head">
+      <span class="kicker">19 · Sources</span>
+      <h2><span class="ar">المصادر</span><span class="en">Sources</span></h2>
+      <p class="lead ar">المصادر الرسمية أولًا. راجع صفحة ESP-CSI الرسمية واللوحة المختارة قبل أي قرار عتاد أو برنامج ثابت. لم تُستخدم صور فوتوغرافية خارجية؛ كل الرسوم SVG مولّدة محليًا.</p>
+      <p class="lead en">Official sources first. Consult the official ESP-CSI repository and your selected board before any hardware or firmware decision. No external photographs are used; all illustrations are locally generated SVG.</p>
+    </div>
+    <div class="tbl-wrap" id="sources-list"></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site">
+  <div class="container foot">
+    <div>
+      <div class="credit">Designed &amp; Developed by GARHI</div>
+      <div class="muted small"><span class="ar">WaveSense AI — مخطط نموذج أولي. بيانات العرض محاكاة. لا يوجد ادعاء بعلامة تجارية مسجلة أو بملكية أصول طرف ثالث.</span><span class="en">WaveSense AI — prototype blueprint. Demo data is simulated. No trademark registration or third-party asset ownership is claimed.</span></div>
+    </div>
+    <a class="btn sm" href="#home"><i data-lucide="arrow-up"></i><span class="ar">للأعلى</span><span class="en">Back to top</span></a>
+  </div>
+</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
