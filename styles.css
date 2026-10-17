@@ -374,3 +374,39 @@ html[dir="rtl"] #toast.show { transform: translate(50%, 0); }
   footer.site { background: none; }
   .gantt { min-width: 0; }
 }
+
+
+/* Mobile responsive fix */
+@media screen and (max-width: 768px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+  .container,
+  .wrapper,
+  .page-container,
+  main,
+  section {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  img,
+  svg,
+  canvas {
+    max-width: 100%;
+  }
+
+  .container,
+  .wrapper,
+  .page-container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
